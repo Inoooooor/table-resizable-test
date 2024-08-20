@@ -1,18 +1,36 @@
 <template>
-  <el-table-v2 :columns="columns" :data="data" :width="900" :height="400" />
+  <div class="input-wrapper" :style="`width: ${tableWidth}px; height: ${rowSize}px;`">
+    <input
+      v-for="column in columns"
+      class="input-range"
+      v-model="column.width"
+      @change="saveColWidthsToLocaLStorage"
+      type="range"
+      id="volume"
+      name="volume"
+      min="50"
+      max="200"
+      :key="column.key"
+    />
+  </div>
+  <el-table-v2 class="bruh" :columns="columns" :data="data" :width="tableWidth" :height="400" />
 </template>
 
 <script setup lang="ts">
-import type { TableColumnCtx } from 'element-plus'
+import { computed, ref } from 'vue'
 
 const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
-  Array.from({ length }).map((_, columnIndex) => ({
-    ...props,
-    key: `${prefix}${columnIndex}`,
-    dataKey: `${prefix}${columnIndex}`,
-    title: `Column ${columnIndex}`,
-    width: 200
-  }))
+  Array.from({ length }).map((_, columnIndex) => {
+    const savedColWidths = JSON.parse(localStorage.getItem('columnsWidth') || '[]')
+    console.log(savedColWidths[columnIndex])
+    return {
+      ...props,
+      key: `${prefix}${columnIndex}`,
+      dataKey: `${prefix}${columnIndex}`,
+      title: `Column ${columnIndex}`,
+      width: savedColWidths[columnIndex] || 200
+    }
+  })
 
 const generateData = (columns: ReturnType<typeof generateColumns>, length = 200, prefix = 'row-') =>
   Array.from({ length }).map((_, rowIndex) => {
@@ -28,33 +46,45 @@ const generateData = (columns: ReturnType<typeof generateColumns>, length = 200,
     )
   })
 
-const columns = generateColumns(10)
-const data = generateData(columns, 1000)
+const columns = ref(generateColumns(10))
 
-interface User {
-  id: string
-  name: string
-  amount1: string
-  amount2: string
-  amount3: number
+const tableWidth = 900
+
+const rowSize = 50
+
+const columnsWidth = computed(() => columns.value.map((column) => column.width))
+
+const saveColWidthsToLocaLStorage = () => {
+  localStorage.setItem('columnsWidth', JSON.stringify(columnsWidth.value))
 }
 
-interface SpanMethodProps {
-  row: User
-  column: TableColumnCtx<User>
-  rowIndex: number
-  columnIndex: number
-}
-
-const arraySpanMethod = ({ row, column, rowIndex, columnIndex }: SpanMethodProps) => {
-  if (rowIndex % 2 === 0) {
-    if (columnIndex === 0) {
-      return [1, 2]
-    } else if (columnIndex === 1) {
-      return [0, 0]
-    }
-  }
-}
+const data = generateData(columns.value, 1000)
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped>
+.input-wrapper {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+}
+
+.input-range {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: col-resize;
+  outline: none;
+  overflow: hidden;
+  height: 100%;
+  background: none;
+  margin: 0;
+  flex: 0 1 auto;
+}
+
+.input-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 50px;
+  width: 1px;
+  border-left: 1px solid black;
+}
+</style>
