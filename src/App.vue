@@ -13,7 +13,7 @@
       :key="column.key"
     />
   </div>
-  <el-table-v2 class="bruh" :columns="columns" :data="data" :width="tableWidth" :height="400" />
+  <el-table-v2 :columns="columns" :data="data" :width="tableWidth" :height="400" />
 </template>
 
 <script setup lang="ts">
