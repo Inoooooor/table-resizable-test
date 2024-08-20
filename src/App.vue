@@ -22,7 +22,6 @@ import { computed, ref } from 'vue'
 const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
   Array.from({ length }).map((_, columnIndex) => {
     const savedColWidths = JSON.parse(localStorage.getItem('columnsWidth') || '[]')
-    console.log(savedColWidths[columnIndex])
     return {
       ...props,
       key: `${prefix}${columnIndex}`,
